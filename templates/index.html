@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deteksi Penyakit Daun Padi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌾 Deteksi Penyakit Padi</h1>
+            <p>Unggah gambar daun padi untuk mendeteksi penyakit</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <form action="/predict" method="post" enctype="multipart/form-data" class="upload-form">
+                    <div class="file-input-wrapper">
+                        <input type="file" name="file" id="file" accept="image/*" required onchange="previewImage(event)">
+                        <label for="file" class="file-label">
+                            <span class="icon">📁</span>
+                            <span id="file-name">Pilih Gambar...</span>
+                        </label>
+                    </div>
+                    <div class="preview-container" id="preview-container" style="display: none;">
+                        <img id="preview" src="#" alt="Preview Gambar">
+                    </div>
+                    <button type="submit" class="btn-predict">🔍 Analisis Penyakit</button>
+                </form>
+            </div>
+
+            {% if error %}
+            <div class="alert error">
+                <p>{{ error }}</p>
+            </div>
+            {% endif %}
+
+            {% if prediction %}
+            <div class="result-section">
+                <div class="result-card">
+                    <h2>Hasil Diagnosa</h2>
+                    <div class="result-details">
+                        <div class="result-image">
+                            <img src="{{ image_url }}" alt="Gambar diupload">
+                        </div>
+                        <div class="result-info">
+                            <p class="label">Penyakit Terdeteksi:</p>
+                            <h3 class="prediction-text {{ prediction }}">{{ prediction }}</h3>
+                            <div class="confidence-bar-wrapper">
+                                <p class="label">Tingkat Kepercayaan:</p>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" style="width: {{ confidence }}%;"></div>
+                                </div>
+                                <span class="confidence-value">{{ confidence }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Aplikasi Deteksi Penyakit Padi - MobileNetV2</p>
+        </footer>
+    </div>
+
+    <script>
+        function previewImage(event) {
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+            const fileNameSpan = document.getElementById('file-name');
+            const previewContainer = document.getElementById('preview-container');
+            const previewImage = document.getElementById('preview');
+
+            if (file) {
+                fileNameSpan.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                fileNameSpan.textContent = 'Pilih Gambar...';
+                previewContainer.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
