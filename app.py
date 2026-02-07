@@ -20,17 +20,23 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Pastikan file model_padi.h5 ada di direktori yang sama
 MODEL_PATH = 'model_padi.h5'
 model = None
+load_error = None
 
 def load_prediction_model():
-    global model
+    global model, load_error
     if os.path.exists(MODEL_PATH):
         try:
             model = load_model(MODEL_PATH)
             print("Model berhasil dimuat.")
+            load_error = None
         except Exception as e:
+            load_error = str(e)
             print(f"Gagal memuat model: {e}")
     else:
-        print(f"File model '{MODEL_PATH}' tidak ditemukan. Pastikan file model ada.")
+        # Debugging: List files in current directory
+        files = os.listdir('.')
+        load_error = f"File model '{MODEL_PATH}' tidak ditemukan di {os.getcwd()}. Isi direktori: {files}"
+        print(load_error)
 
 # Daftar kelas penyakit
 CLASS_NAMES = ["blast", "brownspot", "healthy", "hispa", "leafsmut", "tungro"]
@@ -72,7 +78,8 @@ def predict():
         if model is None:
             load_prediction_model()
             if model is None:
-                return render_template('index.html', error="Model tidak ditemukan. Harap unggah model_padi.h5 ke server.", image_url=url_for('static', filename=f'uploads/{filename}'))
+                error_msg = f"Gagal memuat model. Detail: {load_error}" if load_error else "Model tidak ditemukan/gagal dimuat."
+                return render_template('index.html', error=error_msg, image_url=url_for('static', filename=f'uploads/{filename}'))
 
         try:
             # Preprocessing
